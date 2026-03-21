@@ -25,9 +25,9 @@ def main() -> None:
     # Our goal coordinates in meters. 
     # [0,0] is the origin point defined in 'my_map.yaml'.
     inspection_route = [
-        [0.5, 0.3],
-        [2.0, 1.0],
-        [3.0, 0.3],
+        [0.6, 0.5],
+        [2.0, 0.5],
+        [3.0, 0.5],
     ]
 
     # AMCL (the localization node) needs a starting guess.
@@ -35,11 +35,11 @@ def main() -> None:
     initial_pose = PoseStamped()
     initial_pose.header.frame_id = 'map' # Coordinates are relative to the map
     initial_pose.header.stamp = navigator.get_clock().now().to_msg()
-    initial_pose.pose.position.x = 0.50
-    initial_pose.pose.position.y = 0.90
+    initial_pose.pose.position.x = 0.6
+    initial_pose.pose.position.y = 3.5
     # Quaternions: z=0, w=1 means "facing forward/East" (0 degrees rotation).
     initial_pose.pose.orientation.z = 0.0
-    initial_pose.pose.orientation.w = 1.0
+    initial_pose.pose.orientation.w = 4.72
     # Tells the robot where it is starting. If this doesn't match 
     # the robot's actual physical position, navigation will fail.
     navigator.setInitialPose(initial_pose)
@@ -102,7 +102,6 @@ def main() -> None:
         pass
 
     exit(0)
-
 
 if __name__ == '__main__':
     main()

@@ -19,12 +19,12 @@ def generate_launch_description():
     world_path = os.path.join(pkg_sim, 'worlds', 'turtlebot3_expirement1.world')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    x_pose = LaunchConfiguration('x_pose', default='0.3')
-    y_pose = LaunchConfiguration('y_pose', default='-0.5')
+    x_pose = LaunchConfiguration('x_pose', default='0.6')
+    y_pose = LaunchConfiguration('y_pose', default='3.5')
     z_pose = LaunchConfiguration('z_pose', default='0.01')
     roll  = LaunchConfiguration('roll',  default='0.00')
     pitch = LaunchConfiguration('pitch', default='0.00')
-    yaw = LaunchConfiguration('yaw', default='0.0')
+    yaw = LaunchConfiguration('yaw', default='4.71')
 
     gzserver_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
