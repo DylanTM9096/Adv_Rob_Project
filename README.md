@@ -12,8 +12,7 @@ Make sure the following is being sourced before starting. Copy them into the `~/
 `export TURTLEBOT3_MODEL=waffle`  
 
 To build;  
-`rm -rf build/ install/ log/ #(optional for clean build)`  
-#Removes old build  
+`rm -rf build/ install/ log/ #(optional for clean build)`
 `cd ~/experiment_2 && colcon build --symlink-install && source ~/.bashrc`
 
 To start turtlebot on rasberrypi run this:

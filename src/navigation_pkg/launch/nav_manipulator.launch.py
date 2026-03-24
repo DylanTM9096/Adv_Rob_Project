@@ -8,7 +8,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     map_file = os.path.join(
-        get_package_share_directory('navigation_pkg'), 'config', 'my_map.yaml'
+        get_package_share_directory('navigation_pkg'), 'config', 'my_map_V2.yaml'
     )
 
     param_file = os.path.join(
