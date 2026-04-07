@@ -290,7 +290,7 @@ class TB3FinalMission(Node):
         if self.navigator.getResult() == TaskResult.SUCCEEDED:
             
             self.get_logger().info("Putting object down...")
-            self.send_pick_goal(pos=[0.40, 0.0], z_height=0.1)
+            self.send_pick_goal(pos=[0.35, 0.0], z_height=0.1)
 
             self.get_logger().info("Arrived. Opening gripper...")
             self.send_gripper_goal(close=False) # Open first

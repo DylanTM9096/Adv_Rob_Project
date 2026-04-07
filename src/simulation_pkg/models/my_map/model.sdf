@@ -7,7 +7,7 @@
       <visual name="map_visual">
         <geometry>
           <mesh>
-            <uri>model://my_map/meshes/experiment4_map.STL</uri>
+            <uri>model://my_map/meshes/Experiment_4_map.STL</uri>
             <scale>0.001 0.001 0.001</scale>  <!-- Scaled down from solidworks -->
           </mesh>
         </geometry>
@@ -16,7 +16,7 @@
       <collision name="map_collision">
         <geometry>
           <mesh>
-            <uri>model://my_map/meshes/experiment4_map.STL</uri>
+            <uri>model://my_map/meshes/Experiment_4_map.STL</uri>
             <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
