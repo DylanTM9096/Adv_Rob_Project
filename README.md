@@ -15,6 +15,11 @@ To build;
 `rm -rf build/ install/ log/ #(optional for clean build)`
 `cd ~/Adv_Rob_Project && colcon build --symlink-install && source ~/.bashrc`
 
+
+To start camera topic on pi
+ros2 run ros2_camera_publish execute
+
+
 To start turtlebot on rasberrypi run this:
 *this one doenst launch bringup with the manipulator  
 `ros2 launch turtlebot3_manipulation_bringup hardware.launch.py`

@@ -54,7 +54,7 @@ def compute_3D(u, v, r, diameter_mm, mtx):
     Y = (v - cy) * Z / fy
     return X, Y, Z
 
-def capture_and_compute(ball_diameter_mm, camera_index=1):
+def capture_and_compute(ball_diameter_mm, frame):
     """
     Captures one frame from camera, detects balls, computes 3D coordinates.
     
@@ -62,11 +62,6 @@ def capture_and_compute(ball_diameter_mm, camera_index=1):
         List of dicts: [{'color': str, 'X': float, 'Y': float, 'Z': float}, ...]
     """
     mtx, dist = load_calibration()
-    cap = cv2.VideoCapture(camera_index)
-    ret, frame = cap.read()
-    cap.release()
-    if not ret:
-        raise RuntimeError("Failed to capture image from camera")
 
     frame = cv2.undistort(frame, mtx, dist)
     detections = detect_balls_morphology(frame)

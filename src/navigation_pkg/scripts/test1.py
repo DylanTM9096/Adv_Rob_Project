@@ -17,6 +17,8 @@ from moveit_msgs.action import MoveGroup
 from moveit_msgs.msg import Constraints, PositionConstraint, JointConstraint, OrientationConstraint
 from shape_msgs.msg import SolidPrimitive
 
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy #added this
+
 class TB3FinalMission(Node):
     def __init__(self):
         # Initialize as a ROS 2 Node so we can use Subscribers/ActionClients
@@ -28,7 +30,13 @@ class TB3FinalMission(Node):
 
         # --- 2. LIDAR SETUP ---
         # Subscribe to /scan to find the closest object in front of the robot
-        self.scan_sub = self.create_subscription(LaserScan, '/scan', self.lidar_callback, 10)
+        # added this
+        qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            depth=10
+        )
+        self.scan_sub = self.create_subscription(LaserScan, '/scan', self.lidar_callback, qos)
+
         self.closest_dist = 1.0  # Variable for object distance
         self.closest_angle = 0.0 # Variable for object angle
 
@@ -36,22 +44,26 @@ class TB3FinalMission(Node):
         # Connect to the MoveGroup action server to plan and move the arm
         self.move_group_client = ActionClient(self, MoveGroup, 'move_action')
 
-    def lidar_callback(self, msg):
-        """Finds the closest object in a 180-degree front arc."""
-        # 180° arc: Indices 0-90 (left-front) and 270-359 (right-front)
-        front_indices = list(range(0, 91)) + list(range(270, 360))
+    def lidar_callback(self, msg): #modified this
+        num_readings = len(msg.ranges)
+        
+        # Calculate front arc indices dynamically based on actual scan size
+        # For a 360-reading scan: 0-90 and 270-359
+        # Scale to whatever the actual scan size is
+        quarter = num_readings // 4
+        
+        front_indices = list(range(0, quarter + 1)) + list(range(num_readings - quarter, num_readings))
         
         valid_hits = []
         for i in front_indices:
             dist = msg.ranges[i]
-            # Filter: Ignore 0, infinity, and anything closer than 15cm (robot's own body)
             if 0.15 < dist < 1.5:
                 angle = msg.angle_min + (i * msg.angle_increment)
                 valid_hits.append((dist, angle))
 
         if valid_hits:
-            # Sort the list by distance and pick the smallest one
             self.closest_dist, self.closest_angle = min(valid_hits, key=lambda x: x[0])
+
 
     def send_gripper_goal(self, close=True):
         """Sends a goal to the gripper group using the confirmed joint name."""

@@ -16,6 +16,8 @@ find_package(rclpy REQUIRED)
 install(PROGRAMS
   scripts/test1.py
   scripts/test2.py
+  scripts/test_camera.py
+  scripts/camera_pick.py
   DESTINATION lib/${PROJECT_NAME})
 
 

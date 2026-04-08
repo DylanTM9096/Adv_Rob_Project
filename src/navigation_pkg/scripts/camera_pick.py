@@ -9,7 +9,7 @@ import time
 
 # Navigation and Message Imports
 from geometry_msgs.msg import PoseStamped, Pose
-from sensor_msgs.msg import LaserScan
+from sensor_msgs.msg import LaserScan, Image
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 
 # MoveIt2 Action Imports
@@ -18,6 +18,10 @@ from moveit_msgs.msg import Constraints, PositionConstraint, JointConstraint, Or
 from shape_msgs.msg import SolidPrimitive
 
 from test_camera import capture_and_compute
+
+from cv_bridge import CvBridge
+
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy #added this
 
 class TB3FinalMission(Node):
     def __init__(self):
@@ -30,9 +34,28 @@ class TB3FinalMission(Node):
 
         # --- 2. LIDAR SETUP ---
         # Subscribe to /scan to find the closest object in front of the robot
-        self.scan_sub = self.create_subscription(LaserScan, '/scan', self.lidar_callback, 10)
+
+        #added this
+        qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            depth=10
+        )
+        self.scan_sub = self.create_subscription(LaserScan, '/scan', self.lidar_callback, qos)
+
         self.closest_dist = 1.0  # Variable for object distance
         self.closest_angle = 0.0 # Variable for object angle
+
+
+        self.bridge = CvBridge()
+        self.latest_frame = None  # store latest image
+
+        # sub to camera on pi
+        self.image_sub = self.create_subscription(
+            Image,
+            '/camera/Image',   # adjust if different
+            self.image_callback,
+            10
+        )
 
         # --- 3. MOVEIT SETUP ---
         # Connect to the MoveGroup action server to plan and move the arm
@@ -45,21 +68,32 @@ class TB3FinalMission(Node):
         self.blue_station = [1.3, -1.7, 0.707, -0.707] # station 1 @ 270 degrees (Right)
         self.reject = [0.0, -1.2, 1.0, 0.0] # station 1 @ 270 degrees (Right)
 
-    def lidar_callback(self, msg):
-        """Finds the closest object in a 180-degree front arc."""
-        # 180° arc: Indices 0-90 (left-front) and 270-359 (right-front)
-        front_indices = list(range(0, 91)) + list(range(270, 360))
+
+    def image_callback(self, msg):
+        try:
+            frame = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
+            self.latest_frame = frame
+        except Exception as e:
+            self.get_logger().error(f"Image conversion failed: {e}")
+
+    def lidar_callback(self, msg): #modified this
+        num_readings = len(msg.ranges)
+        
+        # Calculate front arc indices dynamically based on actual scan size
+        # For a 360-reading scan: 0-90 and 270-359
+        # Scale to whatever the actual scan size is
+        quarter = num_readings // 4
+        
+        front_indices = list(range(0, quarter + 1)) + list(range(num_readings - quarter, num_readings))
         
         valid_hits = []
         for i in front_indices:
             dist = msg.ranges[i]
-            # Filter: Ignore 0, infinity, and anything closer than 15cm (robot's own body)
             if 0.15 < dist < 1.5:
                 angle = msg.angle_min + (i * msg.angle_increment)
                 valid_hits.append((dist, angle))
 
         if valid_hits:
-            # Sort the list by distance and pick the smallest one
             self.closest_dist, self.closest_angle = min(valid_hits, key=lambda x: x[0])
 
     def send_gripper_goal(self, close=True):
@@ -236,8 +270,21 @@ class TB3FinalMission(Node):
             camera_forward_offset = 0.1
             camera_vertical_offset = -0.3
 
+            time.sleep(1.0)
+
+            if self.latest_frame is not None:
+                self.get_logger().error("self.latest_frame is not None!")
+                frame = self.latest_frame
+
+                # Example: access pixel or process
+                h, w, _ = frame.shape
+                self.get_logger().info(f"Frame size: {w}x{h}")
+
+            else:
+                self.get_logger().error("self.latest_frame is None!")
+
             # 2. Detect object with camera
-            color, x, y, z = self.detect_color(45)
+            color, x, y, z = self.detect_color(size = 45, frame = frame)
             # Convert from mm to meter
             x, y, z = round(x/1000, 2), round(y/1000, 2), round(z/1000, 2)
 
@@ -266,11 +313,11 @@ class TB3FinalMission(Node):
             self.get_logger().info("Returning to infeed...")
             self.go_to_pose(self.infeed)
             
-    def detect_color(self, size): #temp function to test color sorting
+    def detect_color(self, frame, size): #temp function to test color sorting
         """Placeholder for object classification"""
         self.get_logger().info("Detecting object color...")
 
-        result = capture_and_compute(size)
+        result = capture_and_compute(size, frame)
         if result:
             color, x, y, z = result
             print(f"Nearest ball is {color} at X:{x:.1f}, Y:{y:.1f}, Z:{z:.1f}")
