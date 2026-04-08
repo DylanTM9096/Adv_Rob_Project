@@ -17,7 +17,7 @@ def generate_launch_description():
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
     pkg_sim = get_package_share_directory('simulation_pkg')
 
-    world_path = os.path.join(pkg_sim, 'worlds', 'turtlebot3_expirement1.world')
+    world_path = os.path.join(pkg_sim, 'worlds', 'turtlebot3.world')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     x_pose = LaunchConfiguration('x_pose', default='0.5')
