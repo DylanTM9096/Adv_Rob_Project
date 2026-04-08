@@ -36,6 +36,27 @@ class TB3FinalMission(Node):
         # Connect to the MoveGroup action server to plan and move the arm
         self.move_group_client = ActionClient(self, MoveGroup, 'move_action')
 
+                
+        # NAVIGATE ROUTE [x, y, z_val, w_val]
+        self.routes = {
+            "red": [
+                [4.6, 0.0, 0.0, 1.0],      # infeed
+                [4.5, -2.0, 0.707, -0.707],# station 1
+                [4.6, 0.0, 0.0, 1.0],      # return
+            ],
+            "green": [
+                [4.6, 0.0, 0.0, 1.0],
+                [2.0, 2.0, 1.0, 1.0],      # station 2
+                [4.6, 0.0, 0.0, 1.0],
+            ],
+            "blue": [
+                [4.6, 0.0, 0.0, 1.0],
+                [2.0, -2.0, 0.707, 0.707], # station 3
+                [4.6, 0.0, 0.0, 1.0],
+            ]
+        }
+
+
     def lidar_callback(self, msg):
         """Finds the closest object in a 180-degree front arc."""
         # 180° arc: Indices 0-90 (left-front) and 270-359 (right-front)
@@ -216,108 +237,85 @@ class TB3FinalMission(Node):
             self.get_logger().error(f"MoveGroup failed with status: {err_msg}")
             return False
 
-    def run_mission(self, route):
-        # II. NAVIGATE ROUTE [x, y, z_val, w_val]
+    def run(self):
+        while rclpy.ok():
+
+            # 1. Go to infeed
+            self.get_logger().info("Going to infeed...")
+            self.go_to_pose([4.6, 0.0, 0.0, 0.0])
+
+            # 2. Pick object
+            if self.closest_dist < 1.0:
+                self.pick_object()
+                time.sleep(1.0)
+
+            # 3. Detect color
+            color = self.detect_color()
+
+            # 4. Select route
+            route = self.routes.get(color)
+            if route is None:
+                self.get_logger().error("Unknown color, skipping...")
+                continue
+
+            # 5. Go to station
+            self.get_logger().info(f"Heading to {color} station...")
+            self.go_to_pose(route[1])
+
+            # 6. Drop
+            self.drop_object()
+            time.sleep(1.0)
+
+            # 7. Return to infeed
+            self.get_logger().info("Returning to infeed...")
+            self.go_to_pose(route[2])
+            
+    def detect_color(self): #temp function to test color sorting
+        """Placeholder for object classification"""
+        self.get_logger().info("Detecting object color...")
+
+        # TEMP: simulate detection
+        import random
+        color = random.choice(["red", "green", "blue"])
+
+        self.get_logger().info(f"Detected: {color}")
+        return color
+    
+    def go_to_pose(self, pose):
+        wp = PoseStamped()
+        wp.header.frame_id = 'map'
+        wp.header.stamp = self.get_clock().now().to_msg()
+
+        wp.pose.position.x = pose[0]
+        wp.pose.position.y = pose[1]
+        wp.pose.orientation.z = pose[2]
+        wp.pose.orientation.w = pose[3]
+        wp.pose.orientation.x = 0.0
+        wp.pose.orientation.y = 0.0
+
+        self.navigator.followWaypoints([wp])
+
+        while not self.navigator.isTaskComplete():
+            rclpy.spin_once(self, timeout_sec=0.1)
+
+        return self.navigator.getResult() == TaskResult.SUCCEEDED
+    
+    def pick_object(self):
+        self.get_logger().info("Picking object...")
+
+        self.send_gripper_goal(close=False)
+        self.send_pick_goal(pos=[0.20, 0.00], z_height=0.15)
+        self.send_pick_goal(z_height=0.1)
+        self.send_gripper_goal(close=True)
+        self.send_pick_goal(pos=[0.15, 0.0], z_height=0.25)
         
-        waypoints = []
-        for p in route[:1]:
-            wp = PoseStamped()
-            wp.header.frame_id = 'map'
-            wp.header.stamp = self.get_clock().now().to_msg()
-            wp.pose.position.x = p[0]
-            wp.pose.position.y = p[1]
-            
-            # Correctly set both Z and W components
-            wp.pose.orientation.z = p[2]
-            wp.pose.orientation.w = p[3]
-            
-            # Explicitly zero out X and Y to prevent tilting
-            wp.pose.orientation.x = 0.0
-            wp.pose.orientation.y = 0.0
-            
-            waypoints.append(deepcopy(wp))
-            
+    def drop_object(self):
+        self.get_logger().info("Dropping object...")
 
-        self.get_logger().info("Navigating to Infeed")
-        self.navigator.followWaypoints(waypoints)
+        self.send_pick_goal(pos=[0.35, 0.0], z_height=0.1)
+        self.send_gripper_goal(close=False)
+        self.send_pick_goal(pos=[0.15, 0.0], z_height=0.25)
 
-        # Spinning is critical so the LiDAR data updates while moving
-        while not self.navigator.isTaskComplete():
-            rclpy.spin_once(self, timeout_sec=0.1)
-
-        # III. THE PICK 
-        if self.navigator.getResult() == TaskResult.SUCCEEDED:
-            self.get_logger().info("Arrived. Opening gripper...")
-            self.send_gripper_goal(close=False) # Open first
-
-            self.get_logger().info("Lining up arm...")
-            self.send_pick_goal(pos=[0.20, 0.00], z_height=0.15)
-
-            self.get_logger().info("Reaching for object...")
-            self.send_pick_goal(z_height=0.1)
-
-            self.get_logger().info("Grasping...")
-            self.send_gripper_goal(close=True) # Close claws
-
-            self.get_logger().info("Picking object up...")
-            self.send_pick_goal(pos=[0.15, 0.0], z_height=0.25)
-
-
-        self.get_logger().info("Heading to Drop off Station")
-        waypoints = []
-        for p in route[1:2]:
-            wp = PoseStamped()
-            wp.header.frame_id = 'map'
-            wp.header.stamp = self.get_clock().now().to_msg()
-            wp.pose.position.x = p[0]
-            wp.pose.position.y = p[1]
-            
-            # Correctly set both Z and W components
-            wp.pose.orientation.z = p[2]
-            wp.pose.orientation.w = p[3]
-            
-            # Explicitly zero out X and Y to prevent tilting
-            wp.pose.orientation.x = 0.0
-            wp.pose.orientation.y = 0.0
-            
-            waypoints.append(deepcopy(wp))
-
-        self.navigator.followWaypoints(waypoints)
-
-        # Spinning is critical so the LiDAR data updates while moving
-        while not self.navigator.isTaskComplete():
-            rclpy.spin_once(self, timeout_sec=0.1)
-
-        if self.navigator.getResult() == TaskResult.SUCCEEDED:
-            
-            self.get_logger().info("Putting object down...")
-            self.send_pick_goal(pos=[0.35, 0.0], z_height=0.1)
-
-            self.get_logger().info("Arrived. Opening gripper...")
-            self.send_gripper_goal(close=False) # Open first
-
-            self.get_logger().info("Stowing arm...")
-            self.send_pick_goal(pos=[0.15, 0.0], z_height=0.25)
-            
-            
-            
-        waypoints = []
-        for p in route[2:3]:
-            wp = PoseStamped()
-            wp.header.frame_id = 'map'
-            wp.header.stamp = self.get_clock().now().to_msg()
-            wp.pose.position.x = p[0]
-            wp.pose.position.y = p[1]
-            
-            # Correctly set both Z and W components
-            wp.pose.orientation.z = p[2]
-            wp.pose.orientation.w = p[3]
-            
-            # Explicitly zero out X and Y to prevent tilting
-            wp.pose.orientation.x = 0.0
-            wp.pose.orientation.y = 0.0
-            
-            waypoints.append(deepcopy(wp))
 
 def main():
     rclpy.init()
@@ -327,34 +325,13 @@ def main():
     init_pose = PoseStamped()
     init_pose.header.frame_id = 'map'
     init_pose.header.stamp = mission.get_clock().now().to_msg()
-    init_pose.pose.position.x, init_pose.pose.position.y, init_pose.pose.orientation.z, init_pose.pose.orientation.w = 0.0, 0.0, 0.0, 0.0
+    init_pose.pose.position.x, init_pose.pose.position.y, init_pose.pose.orientation.z, init_pose.pose.orientation.w = 0.0, 0.0, 0.0, 1.0
     mission.navigator.setInitialPose(init_pose)
     mission.navigator.waitUntilNav2Active()
 
-    # II. NAVIGATE ROUTE [x, y, z_val, w_val]
-    infeed_to_s1 = [
-                [4.6, 0.0, 0.0, 0.0], #infeed station
-                [4.5, -2.0, 0.707, -0.707], # station 1 @ 270 degrees (Right)
-                [4.6, 0.0, 0.0, 0.0], #infeed station
-            ]
-    
-        # route1 = [
-        #         [4.6, 0.0, 0.707, 0.707], # 90 degrees (Left)
-        #         [2.0, 2.0, 1.0, 0.0], # 180 degrees (Backward)
-        #         [0.0, 1.9, 1.0, 0.0], 
-        #         [2.0, 2.0, 0.707, -0.707], # 270 degrees (Right)
-        #         [2.0, 0.0, 1.0, 0.0], # 180 degrees (Backward)
-        #         [0.0, 0.0, 1.0, 0.0]
-        #     ]
-
-    # get_ball_color()
-        # if red 
-        #     mission.run_mission(infeed_to_s1)
-        # if green
-
 
     try:
-        mission.run_mission(infeed_to_s1)
+        mission.run()
     finally:
         rclpy.shutdown()
 

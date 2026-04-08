@@ -35,169 +35,218 @@
       <static>true</static>
     </include>
 
- <!-- Obstacle 1 -->
-    <model name="Obstacle1">
-      <pose> 0.2 1.5 0.1 0 0 0</pose>
-      <static>true</static>
 
-      <link name="link">
+<!-- Infeed Station -->
+<model name="Infeed Station">
+<!--      x   y   z  rpw -->
+  <pose>4.4 2.0 0.05 0 0 0</pose>
+  <static>true</static>
 
-        <visual name="visual">
-          <geometry>
-            <cylinder>
-              <radius>0.02</radius>
-              <length>0.20</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <ambient>0 0 1 1</ambient>
-          </material>
-        </visual>
+  <link name="link">
 
-        <collision name="collision">
-          <geometry>
-            <cylinder>
-              <radius>0.03</radius>
-              <length>0.20</length>
-            </cylinder>
-          </geometry>
+    <visual name="visual">
+      <geometry>
+        <box>
+          <size>0.20 0.30 0.10</size>
+        </box>
+      </geometry>
+      <material>
+      <!--       r g b -->
+        <ambient>0 1 0 1</ambient>
+      </material>
+    </visual>
 
-          <surface>
-            <friction>
-              <ode>
-                <mu>10</mu>
-                <mu2>10</mu2>
-              </ode>
-            </friction>
-          </surface>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.04 0.04 0.20</size>
+        </box>
+      </geometry>
 
-        </collision>
+      <surface>
+        <friction>
+          <ode>
+            <mu>10</mu>
+            <mu2>10</mu2>
+          </ode>
+        </friction>
+      </surface>
 
-      </link>
-    </model>
+    </collision>
 
- <!-- Obstacle 2 -->
-    <model name="Obstacle2">
-      <pose> 1.5 2.2 0.1 0 0 0</pose>
-      <static>true</static>
+  </link>
+</model>
 
-      <link name="link">
 
-        <visual name="visual">
-          <geometry>
-            <cylinder>
-              <radius>0.02</radius>
-              <length>0.20</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <ambient>0 0 1 1</ambient>
-          </material>
-        </visual>
+<!-- Station 1 -->
+<model name="Station 1">
+<!--      x   y   z  rpw -->
+  <pose>4.0 0.0 0.1 0 0 0</pose>
+  <static>true</static>
 
-        <collision name="collision">
-          <geometry>
-            <cylinder>
-              <radius>0.03</radius>
-              <length>0.20</length>
-            </cylinder>
-          </geometry>
+  <link name="link">
 
-          <surface>
-            <friction>
-              <ode>
-                <mu>10</mu>
-                <mu2>10</mu2>
-              </ode>
-            </friction>
-          </surface>
+    <visual name="visual">
+      <geometry>
+        <box>
+          <size>0.20 0.07 0.20</size>
+        </box>
+      </geometry>
+      <material>
+      <!--       r g b -->
+        <ambient>1 0 0 1</ambient>
+      </material>
+    </visual>
 
-        </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.20 0.07 0.20</size>
+        </box>
+      </geometry>
 
-      </link>
-    </model>
+      <surface>
+        <friction>
+          <ode>
+            <mu>10</mu>
+            <mu2>10</mu2>
+          </ode>
+        </friction>
+      </surface>
 
- <!-- Obstacle 3 -->
-    <model name="Obstacle3">
-      <pose> 2.5 2.7 0.1 0 0 0</pose>
-      <static>false</static>
+    </collision>
 
-      <link name="link">
+  </link>
+</model>
 
-        <visual name="visual">
-          <geometry>
-            <cylinder>
-              <radius>0.02</radius>
-              <length>0.15</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <ambient>0 0 1 1</ambient>
-          </material>
-        </visual>
 
-        <collision name="collision">
-          <geometry>
-            <cylinder>
-              <radius>0.01</radius>
-              <length>0.15</length>
-            </cylinder>
-          </geometry>
+<!-- Station 2 -->
+<model name="Station 2">
+<!--      x   y   z  rpw -->
+  <pose>2.9 0.0 0.1 0 0 0</pose>
+  <static>true</static>
 
-          <surface>
-            <friction>
-              <ode>
-                <mu>10</mu>
-                <mu2>10</mu2>
-              </ode>
-            </friction>
-          </surface>
+  <link name="link">
 
-        </collision>
+    <visual name="visual">
+      <geometry>
+        <box>
+          <size>0.20 0.07 0.20</size>
+        </box>
+      </geometry>
+      <material>
+      <!--       r g b -->
+        <ambient>1 0 0.1 1</ambient>
+      </material>
+    </visual>
 
-      </link>
-    </model>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.20 0.07 0.20</size>
+        </box>
+      </geometry>
 
- <!-- Obstacle 4 -->
-    <model name="Obstacle4">
-      <pose> 1.4 1.5 0.1 0 0 0</pose>
-      <static>false</static>
+      <surface>
+        <friction>
+          <ode>
+            <mu>10</mu>
+            <mu2>10</mu2>
+          </ode>
+        </friction>
+      </surface>
 
-      <link name="link">
+    </collision>
 
-        <visual name="visual">
-          <geometry>
-            <cylinder>
-              <radius>0.02</radius>
-              <length>0.15</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <ambient>0 0 1 1</ambient>
-          </material>
-        </visual>
+  </link>
+</model>
 
-        <collision name="collision">
-          <geometry>
-            <cylinder>
-              <radius>0.01</radius>
-              <length>0.15</length>
-            </cylinder>
-          </geometry>
 
-          <surface>
-            <friction>
-              <ode>
-                <mu>10</mu>
-                <mu2>10</mu2>
-              </ode>
-            </friction>
-          </surface>
+<!-- Station 3 -->
+<model name="Station 3">
+<!--      x   y   z  rpw -->
+  <pose>1.8 0.0 0.1 0 0 0</pose>
+  <static>true</static>
 
-        </collision>
+  <link name="link">
 
-      </link>
-    </model>
+    <visual name="visual">
+      <geometry>
+        <box>
+          <size>0.20 0.07 0.20</size>
+        </box>
+      </geometry>
+      <material>
+      <!--       r g b -->
+        <ambient>1 0 0.2 1</ambient>
+      </material>
+    </visual>
+
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.20 0.07 0.20</size>
+        </box>
+      </geometry>
+
+      <surface>
+        <friction>
+          <ode>
+            <mu>10</mu>
+            <mu2>10</mu2>
+          </ode>
+        </friction>
+      </surface>
+
+    </collision>
+
+  </link>
+</model>
+
+<!-- Reject Station -->
+<model name="Reject Station">
+<!--      x   y   z  rpw -->
+  <pose>0.05 0.85 0.1 0 0 0</pose>
+  <static>true</static>
+
+  <link name="link">
+
+    <visual name="visual">
+      <geometry>
+        <box>
+          <size>0.07 0.20 0.20</size>
+        </box>
+      </geometry>
+      <material>
+      <!--       r g b -->
+        <ambient>1 0 1 1</ambient>
+      </material>
+    </visual>
+
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.07 0.20 0.20</size>
+        </box>
+      </geometry>
+
+      <surface>
+        <friction>
+          <ode>
+            <mu>10</mu>
+            <mu2>10</mu2>
+          </ode>
+        </friction>
+      </surface>
+
+    </collision>
+
+  </link>
+</model>
+
+
+
+
 
   </world>
 </sdf>

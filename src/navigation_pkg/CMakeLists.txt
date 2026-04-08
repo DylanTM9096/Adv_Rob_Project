@@ -14,14 +14,8 @@ find_package(rclpy REQUIRED)
 
 # Install Python scripts
 install(PROGRAMS
-  # scripts/multi_waypoint.py
-  # scripts/single_goal_nav.py
   scripts/test1.py
   scripts/test2.py
-  # scripts/test2.py
-  # scripts/mobile_manip.py
-  scripts/experiment_1_v1.py
-  # scripts/manipulator.py
   DESTINATION lib/${PROJECT_NAME})
 
 
