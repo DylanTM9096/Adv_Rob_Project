@@ -327,15 +327,15 @@ def main():
     init_pose = PoseStamped()
     init_pose.header.frame_id = 'map'
     init_pose.header.stamp = mission.get_clock().now().to_msg()
-    init_pose.pose.position.x, init_pose.pose.position.y, init_pose.pose.orientation.z, init_pose.pose.orientation.w = 0.0, 0.0, 0.0, 0.0
+    init_pose.pose.position.x, init_pose.pose.position.y, init_pose.pose.orientation.z, init_pose.pose.orientation.w = 0.0, 0.0, 0.0, 1.0
     mission.navigator.setInitialPose(init_pose)
     mission.navigator.waitUntilNav2Active()
 
     # II. NAVIGATE ROUTE [x, y, z_val, w_val]
     infeed_to_s1 = [
-                [4.6, 0.0, 0.0, 0.0], #infeed station
+                [4.6, 0.0, 0.0, 1.0], #infeed station
                 [4.5, -2.0, 0.707, -0.707], # station 1 @ 270 degrees (Right)
-                [4.6, 0.0, 0.0, 0.0], #infeed station
+                [4.6, 0.0, 0.0, 1.0], #infeed station
             ]
     
         # route1 = [

@@ -36,26 +36,12 @@ class TB3FinalMission(Node):
         # Connect to the MoveGroup action server to plan and move the arm
         self.move_group_client = ActionClient(self, MoveGroup, 'move_action')
 
-                
-        # NAVIGATE ROUTE [x, y, z_val, w_val]
-        self.routes = {
-            "red": [
-                [4.6, 0.0, 0.0, 1.0],      # infeed
-                [4.5, -2.0, 0.707, -0.707],# station 1
-                [4.6, 0.0, 0.0, 1.0],      # return
-            ],
-            "green": [
-                [4.6, 0.0, 0.0, 1.0],
-                [2.0, 2.0, 1.0, 1.0],      # station 2
-                [4.6, 0.0, 0.0, 1.0],
-            ],
-            "blue": [
-                [4.6, 0.0, 0.0, 1.0],
-                [2.0, -2.0, 0.707, 0.707], # station 3
-                [4.6, 0.0, 0.0, 1.0],
-            ]
-        }
-
+        #Positions of infeed, stations and reject
+        self.infeed = [3.6, 0.0, 0.0, 1.0] #infeed station    
+        self.red_station = [3.5, -1.7, 0.707, -0.707] # station 1 @ 270 degrees (Right)
+        self.green_station = [2.4, -1.7, 0.707, -0.707] # station 1 @ 270 degrees (Right)
+        self.blue_station = [1.3, -1.7, 0.707, -0.707] # station 1 @ 270 degrees (Right)
+        self.reject = [0.0, -1.2, 1.0, 0.0] # station 1 @ 270 degrees (Right)
 
     def lidar_callback(self, msg):
         """Finds the closest object in a 180-degree front arc."""
@@ -242,7 +228,7 @@ class TB3FinalMission(Node):
 
             # 1. Go to infeed
             self.get_logger().info("Going to infeed...")
-            self.go_to_pose([4.6, 0.0, 0.0, 0.0])
+            self.go_to_pose(self.infeed)
 
             # 2. Pick object
             if self.closest_dist < 1.0:
@@ -251,16 +237,17 @@ class TB3FinalMission(Node):
 
             # 3. Detect color
             color = self.detect_color()
-
-            # 4. Select route
-            route = self.routes.get(color)
-            if route is None:
-                self.get_logger().error("Unknown color, skipping...")
-                continue
+            if color == 'red':
+                self.go_to_pose(self.red_station)
+            elif color == 'green':
+                self.go_to_pose(self.green_station)
+            elif color == 'blue':
+                self.go_to_pose(self.blue_station)
+            elif color == 'reject':
+                self.go_to_pose(self.reject)
 
             # 5. Go to station
             self.get_logger().info(f"Heading to {color} station...")
-            self.go_to_pose(route[1])
 
             # 6. Drop
             self.drop_object()
@@ -268,7 +255,7 @@ class TB3FinalMission(Node):
 
             # 7. Return to infeed
             self.get_logger().info("Returning to infeed...")
-            self.go_to_pose(route[2])
+            self.go_to_pose(self.infeed)
             
     def detect_color(self): #temp function to test color sorting
         """Placeholder for object classification"""
@@ -276,7 +263,7 @@ class TB3FinalMission(Node):
 
         # TEMP: simulate detection
         import random
-        color = random.choice(["red", "green", "blue"])
+        color = random.choice(["red", "green", "blue", "reject"])
 
         self.get_logger().info(f"Detected: {color}")
         return color
@@ -293,7 +280,8 @@ class TB3FinalMission(Node):
         wp.pose.orientation.x = 0.0
         wp.pose.orientation.y = 0.0
 
-        self.navigator.followWaypoints([wp])
+        # Pass the PoseStamped directly, not as a list
+        self.navigator.goToPose(wp)
 
         while not self.navigator.isTaskComplete():
             rclpy.spin_once(self, timeout_sec=0.1)
