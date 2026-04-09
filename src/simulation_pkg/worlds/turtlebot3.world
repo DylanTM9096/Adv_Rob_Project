@@ -52,7 +52,7 @@
       </geometry>
       <material>
       <!--       r g b -->
-        <ambient>0 1 0 1</ambient>
+        <ambient>1 1 1 1</ambient>
       </material>
     </visual>
 

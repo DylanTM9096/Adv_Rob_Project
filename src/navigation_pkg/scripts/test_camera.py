@@ -2,11 +2,24 @@ import cv2
 import numpy as np
 import math
 
-# Load camera calibration
+
+from ament_index_python.packages import get_package_share_directory
+import os
+
 def load_calibration():
-    mtx = np.loadtxt("camera_matrix.txt", delimiter=",")
-    dist = np.loadtxt("distortion_coefficients.txt", delimiter=",")
+    pkg_path = get_package_share_directory('navigation_pkg')
+
+    mtx = np.loadtxt(os.path.join(pkg_path, 'config', 'camera_matrix.txt'), delimiter=",")
+    dist = np.loadtxt(os.path.join(pkg_path, 'config', 'distortion_coefficients.txt'), delimiter=",")
+
     return mtx, dist
+
+
+# # Load camera calibration
+# def load_calibration():
+#     mtx = np.loadtxt("camera_matrix.txt", delimiter=",")
+#     dist = np.loadtxt("distortion_coefficients.txt", delimiter=",")
+#     return mtx, dist
 
 # HSV colour ranges
 COLOR_RANGES = {

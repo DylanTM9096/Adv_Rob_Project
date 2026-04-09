@@ -62,7 +62,7 @@ class TB3FinalMission(Node):
         self.move_group_client = ActionClient(self, MoveGroup, 'move_action')
 
         #Positions of infeed, stations and reject
-        self.infeed = [3.6, 0.0, 0.0, 1.0] #infeed station    
+        self.infeed = [3.55, 0.0, 0.0, 1.0] #infeed station    
         self.red_station = [3.5, -1.7, 0.707, -0.707] # station 1 @ 270 degrees (Right)
         self.green_station = [2.4, -1.7, 0.707, -0.707] # station 1 @ 270 degrees (Right)
         self.blue_station = [1.3, -1.7, 0.707, -0.707] # station 1 @ 270 degrees (Right)
