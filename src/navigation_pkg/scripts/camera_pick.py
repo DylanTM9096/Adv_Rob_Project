@@ -275,22 +275,42 @@ class TB3FinalMission(Node):
 
             time.sleep(10.0)
 
+            # Spin instead of sleep
+            start = time.time()
+            while time.time() - start < 2.0:
+                rclpy.spin_once(self, timeout_sec=0.1)
+
+            # Wait for frame
+            while self.latest_frame is None:
+                self.get_logger().info("Waiting for camera frame...")
+                rclpy.spin_once(self, timeout_sec=0.1)
+
+            frame = self.latest_frame
+
+            h, w, _ = frame.shape
+            self.get_logger().info(f"Frame size: {w}x{h}")
+
+            color, x, y, z = self.detect_color(size=45, frame=frame)
+
             # frame = None
 
-            if self.latest_frame is not None:
-                self.get_logger().log("self.latest_frame Found!")
-                frame = self.latest_frame
+            # if self.latest_frame is not None:
+            #     self.get_logger().log("self.latest_frame Found!")
+            #     frame = self.latest_frame
 
-                # Example: access pixel or process
-                h, w, _ = frame.shape
-                self.get_logger().info(f"Frame size: {w}x{h}")
+            #     # Example: access pixel or process
+            #     h, w, _ = frame.shape
+            #     self.get_logger().info(f"Frame size: {w}x{h}")
 
-            else:
-                self.get_logger().error("self.latest_frame is None!")
+            # else:
+            #     self.get_logger().error("self.latest_frame is None!")
                 
 
-            # 2. Detect object with camera
-            color, x, y, z = self.detect_color(size = 45, frame = frame)
+            # # 2. Detect object with camera
+            # color, x, y, z = self.detect_color(size = 45, frame = frame)
+
+
+
             # Convert from mm to meter
             x, y, z = round(x/1000, 2), round(y/1000, 2), round(z/1000, 2)
 
