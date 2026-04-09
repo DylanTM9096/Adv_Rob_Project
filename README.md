@@ -1,6 +1,6 @@
 #Pre requisits
 
-First ros2, turtlebot_ws and gazebo needs to be installed. Installation guidie can be found **[here](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/)**.
+First ros2, turtlebot_ws and gazebo needs to be installed. Installation guidie can be found **[here](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/)**. Make sure to install ros2 humble.
 
 
 Make sure the following is being sourced before starting. Copy them into the `~/.bashrc` file to be loaded on cmd start.
@@ -16,8 +16,8 @@ To build;
 `cd ~/Adv_Rob_Project && colcon build --symlink-install && source ~/.bashrc`
 
 
-To start camera topic on pi
-ros2 run ros2_camera_publish execute
+Follow the link to have the rasberrypi on the turtlebot publish camera frames, **[link](https://github.com/ANI717/ros2_camera_publish)**. To start camera topic on pi run  
+`ros2 run ros2_camera_publish execute`
 
 
 To start turtlebot on rasberrypi run this:
