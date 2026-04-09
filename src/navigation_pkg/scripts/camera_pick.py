@@ -55,14 +55,14 @@ class TB3FinalMission(Node):
         self.latest_frame = None  # store latest image
 
         # sub to camera on pi
-        self.image_sub = self.create_subscription(Image, '/pi_camera/image_raw', self.image_callback, qos_profile=camera_qos)
+        self.image_sub = self.create_subscription(Image, '/camera', self.image_callback, qos_profile=camera_qos)
 
         # --- 3. MOVEIT SETUP ---
         # Connect to the MoveGroup action server to plan and move the arm
         self.move_group_client = ActionClient(self, MoveGroup, 'move_action')
 
         #Positions of infeed, stations and reject
-        self.infeed = [3.55, 0.0, 0.0, 1.0] #infeed station    
+        self.infeed = [3.6, 0.0, 0.0, 1.0] #infeed station    
         self.red_station = [3.5, -1.7, 0.707, -0.707] # station 1 @ 270 degrees (Right)
         self.green_station = [2.4, -1.7, 0.707, -0.707] # station 1 @ 270 degrees (Right)
         self.blue_station = [1.3, -1.7, 0.707, -0.707] # station 1 @ 270 degrees (Right)
@@ -71,7 +71,10 @@ class TB3FinalMission(Node):
 
     def image_callback(self, msg):
         try:
+            self.get_logger().info("Trying to get frame!!")
             frame = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
+            if frame is not None:
+                self.get_logger().info("Recived Frame!")
             self.latest_frame = frame
         except Exception as e:
             self.get_logger().error(f"Image conversion failed: {e}")
@@ -270,10 +273,12 @@ class TB3FinalMission(Node):
             camera_forward_offset = 0.1
             camera_vertical_offset = -0.3
 
-            time.sleep(1.0)
+            time.sleep(10.0)
+
+            # frame = None
 
             if self.latest_frame is not None:
-                self.get_logger().error("self.latest_frame is not None!")
+                self.get_logger().log("self.latest_frame Found!")
                 frame = self.latest_frame
 
                 # Example: access pixel or process
@@ -282,6 +287,7 @@ class TB3FinalMission(Node):
 
             else:
                 self.get_logger().error("self.latest_frame is None!")
+                
 
             # 2. Detect object with camera
             color, x, y, z = self.detect_color(size = 45, frame = frame)
@@ -290,7 +296,8 @@ class TB3FinalMission(Node):
 
             # 3. Pick object
             if self.closest_dist < 1.0:
-                self.pick_object(x + camera_forward_offset, y, z + camera_vertical_offset)
+                # self.pick_object(x + camera_forward_offset, y, z + camera_vertical_offset)
+                self.pick_object(z + camera_forward_offset, x, y + camera_vertical_offset)
                 time.sleep(1.0)
 
             # 4. Go to station
@@ -326,6 +333,20 @@ class TB3FinalMission(Node):
 
         return color, x, y, z
     
+
+    def detect_color_rand(self, frame, size): #temp function to test color sorting
+        """Placeholder for object classification"""
+        self.get_logger().info("Detecting object color...")
+
+        # TEMP: simulate detection
+        import random
+        color = random.choice(["red", "green", "blue", "reject"])
+
+        self.get_logger().info(f"Detected: {color}")
+        return color , 0.25, 0, 0.15
+
+
+
     def go_to_pose(self, pose):
         wp = PoseStamped()
         wp.header.frame_id = 'map'

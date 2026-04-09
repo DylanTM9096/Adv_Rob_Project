@@ -9,8 +9,8 @@ import os
 def load_calibration():
     pkg_path = get_package_share_directory('navigation_pkg')
 
-    mtx = np.loadtxt(os.path.join(pkg_path, 'config', 'camera_matrix.txt'), delimiter=",")
-    dist = np.loadtxt(os.path.join(pkg_path, 'config', 'distortion_coefficients.txt'), delimiter=",")
+    mtx = np.loadtxt(os.path.join(pkg_path, 'config', 'camera_matrix_real.txt'), delimiter=",")
+    dist = np.loadtxt(os.path.join(pkg_path, 'config', 'distortion_coefficients real.txt'), delimiter=",")
 
     return mtx, dist
 
