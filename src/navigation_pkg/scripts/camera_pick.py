@@ -21,7 +21,7 @@ from test_camera import capture_and_compute
 
 from cv_bridge import CvBridge
 
-from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy #added this
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 
 class TB3FinalMission(Node):
     def __init__(self):
@@ -36,12 +36,17 @@ class TB3FinalMission(Node):
         # Subscribe to /scan to find the closest object in front of the robot
 
         #added this
-        qos = QoSProfile(
+        lidar_qos = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
             depth=10
         )
-        self.scan_sub = self.create_subscription(LaserScan, '/scan', self.lidar_callback, qos)
+        self.scan_sub = self.create_subscription(LaserScan, '/scan', self.lidar_callback, lidar_qos)
 
+        camera_qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1
+        )
         self.closest_dist = 1.0  # Variable for object distance
         self.closest_angle = 0.0 # Variable for object angle
 
@@ -50,12 +55,7 @@ class TB3FinalMission(Node):
         self.latest_frame = None  # store latest image
 
         # sub to camera on pi
-        self.image_sub = self.create_subscription(
-            Image,
-            '/camera/Image',   # adjust if different
-            self.image_callback,
-            10
-        )
+        self.image_sub = self.create_subscription(Image, '/pi_camera/image_raw', self.image_callback, qos_profile=camera_qos)
 
         # --- 3. MOVEIT SETUP ---
         # Connect to the MoveGroup action server to plan and move the arm

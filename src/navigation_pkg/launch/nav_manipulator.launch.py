@@ -46,7 +46,7 @@ def generate_launch_description():
             name='keepout_filter_mask_server',
             output='screen',
             parameters=[{
-                'use_sim_time': False,
+                'use_sim_time': True,
                 'yaml_filename': keepout_mask_file,  # define this path like your other files
                 'topic_name': '/keepout_filter_mask',  # added this
                 'frame_id': 'map', #added this
@@ -65,7 +65,7 @@ def generate_launch_description():
             name='lifecycle_manager_keepout',
             output='screen',
             parameters=[{
-                'use_sim_time': False,
+                'use_sim_time': True,
                 'autostart': True,
                 'node_names': ['keepout_filter_mask_server', 'keepout_costmap_filter_info_server'],
             }],
